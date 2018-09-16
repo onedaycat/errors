@@ -181,7 +181,7 @@ func FromError(err error) (*AppError, bool) {
 func ErrStatus(err error) int {
 	herr, ok := err.(*AppError)
 	if !ok {
-		return 0
+		return 520
 	}
 
 	return herr.Status
