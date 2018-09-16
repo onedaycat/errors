@@ -10,6 +10,18 @@ import (
 
 type Input map[string]interface{}
 
+const (
+	BadRequestStatus    = 400
+	UnauthorizedStatus  = 401
+	ForbiddenStatus     = 403
+	NotFoundStatus      = 404
+	TimeoutStatus       = 441
+	InternalErrorStatus = 500
+	NotImplementStatus  = 501
+	UnavailableStatus   = 503
+	UnknownErrorStatus  = 520
+)
+
 // AppError error
 type AppError struct {
 	Status  int    `json:"status"`
@@ -81,75 +93,75 @@ func Errorf(status int, code, format string, v ...interface{}) *AppError {
 }
 
 func BadRequest(code, msg string) *AppError {
-	return &AppError{400, code, msg, nil, nil}
+	return &AppError{BadRequestStatus, code, msg, nil, nil}
 }
 
 func BadRequestf(code, format string, v ...interface{}) *AppError {
-	return &AppError{400, code, fmt.Sprintf(format, v...), nil, nil}
+	return &AppError{BadRequestStatus, code, fmt.Sprintf(format, v...), nil, nil}
 }
 
 func Unauthorized(code, msg string) *AppError {
-	return &AppError{401, code, msg, nil, nil}
+	return &AppError{UnauthorizedStatus, code, msg, nil, nil}
 }
 
 func Unauthorizedf(code, format string, v ...interface{}) *AppError {
-	return &AppError{401, code, fmt.Sprintf(format, v...), nil, nil}
+	return &AppError{UnauthorizedStatus, code, fmt.Sprintf(format, v...), nil, nil}
 }
 
 func Forbidden(code, msg string) *AppError {
-	return &AppError{403, code, msg, nil, nil}
+	return &AppError{ForbiddenStatus, code, msg, nil, nil}
 }
 
 func Forbiddenf(code, format string, v ...interface{}) *AppError {
-	return &AppError{403, code, fmt.Sprintf(format, v...), nil, nil}
+	return &AppError{ForbiddenStatus, code, fmt.Sprintf(format, v...), nil, nil}
 }
 
 func NotFound(code, msg string) *AppError {
-	return &AppError{404, code, msg, nil, nil}
+	return &AppError{NotFoundStatus, code, msg, nil, nil}
 }
 
 func NotFoundf(code, format string, v ...interface{}) *AppError {
-	return &AppError{404, code, fmt.Sprintf(format, v...), nil, nil}
+	return &AppError{NotFoundStatus, code, fmt.Sprintf(format, v...), nil, nil}
 }
 
 func InternalError(code, msg string) *AppError {
-	return &AppError{500, code, msg, nil, nil}
+	return &AppError{InternalErrorStatus, code, msg, nil, nil}
 }
 
 func InternalErrorf(code, format string, v ...interface{}) *AppError {
-	return &AppError{500, code, fmt.Sprintf(format, v...), nil, nil}
+	return &AppError{InternalErrorStatus, code, fmt.Sprintf(format, v...), nil, nil}
 }
 
 func Timeout(code, msg string) *AppError {
-	return &AppError{441, code, msg, nil, nil}
+	return &AppError{TimeoutStatus, code, msg, nil, nil}
 }
 
 func Timeoutf(code, format string, v ...interface{}) *AppError {
-	return &AppError{441, code, fmt.Sprintf(format, v...), nil, nil}
+	return &AppError{TimeoutStatus, code, fmt.Sprintf(format, v...), nil, nil}
 }
 
 func NotImplement(code, msg string) *AppError {
-	return &AppError{501, code, msg, nil, nil}
+	return &AppError{NotFoundStatus, code, msg, nil, nil}
 }
 
 func NotImplementf(code, format string, v ...interface{}) *AppError {
-	return &AppError{501, code, fmt.Sprintf(format, v...), nil, nil}
+	return &AppError{NotFoundStatus, code, fmt.Sprintf(format, v...), nil, nil}
 }
 
 func Unavailable(code, msg string) *AppError {
-	return &AppError{503, code, msg, nil, nil}
+	return &AppError{UnavailableStatus, code, msg, nil, nil}
 }
 
 func Unavailablef(code, format string, v ...interface{}) *AppError {
-	return &AppError{503, code, fmt.Sprintf(format, v...), nil, nil}
+	return &AppError{UnavailableStatus, code, fmt.Sprintf(format, v...), nil, nil}
 }
 
 func UnknownError(code, msg string) *AppError {
-	return &AppError{520, code, msg, nil, nil}
+	return &AppError{UnknownErrorStatus, code, msg, nil, nil}
 }
 
 func UnknownErrorf(code, format string, v ...interface{}) *AppError {
-	return &AppError{520, code, fmt.Sprintf(format, v...), nil, nil}
+	return &AppError{UnknownErrorStatus, code, fmt.Sprintf(format, v...), nil, nil}
 }
 
 func Cause(err error) error {
