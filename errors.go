@@ -15,6 +15,7 @@ var (
 type Input map[string]interface{}
 
 const (
+	GolangErrorStatus   = 0
 	BadRequestStatus    = 400
 	UnauthorizedStatus  = 401
 	ForbiddenStatus     = 403
@@ -224,7 +225,7 @@ func FromError(err error) (*AppError, bool) {
 func ErrStatus(err error) int {
 	herr, ok := err.(*AppError)
 	if !ok {
-		return 520
+		return GolangErrorStatus
 	}
 
 	return herr.Status
