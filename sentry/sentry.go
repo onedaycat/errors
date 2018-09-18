@@ -12,7 +12,13 @@ var defaultOption = &options{}
 
 type Tags = raven.Tags
 type Extra = raven.Extra
-type User = raven.User
+
+type User struct {
+	ID     string   `json:"id,omitempty"`
+	Email  string   `json:"email,omitempty"`
+	Groups []string `json:"groups,omitempty"`
+	IP     string   `json:"ip,omitempty"`
+}
 
 type Packet struct {
 	packet *raven.Packet
