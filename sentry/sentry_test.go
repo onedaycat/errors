@@ -26,7 +26,7 @@ func TestCaptureAndWait(t *testing.T) {
 	})
 
 	p := NewPacket(err)
-	p.AddStackTrace(err.Stack())
+	p.AddStackTrace(err.StackTrace())
 	p.AddUser(&User{
 		ID: "tester",
 	})

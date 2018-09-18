@@ -47,7 +47,7 @@ func (e *AppError) Error() string {
 }
 
 // Stack return Sentry Stack trace
-func (e *AppError) Stack() *raven.Stacktrace { return e.stack }
+func (e *AppError) StackTrace() *raven.Stacktrace { return e.stack }
 
 // WithCause error
 func (e *AppError) WithCause(err error) *AppError {
