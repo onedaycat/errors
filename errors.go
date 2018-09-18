@@ -8,7 +8,6 @@ import (
 )
 
 var (
-	_platform         = "go"
 	TraceContextLines = 3
 	TraceSkipFrames   = 1
 )
