@@ -15,6 +15,19 @@ var (
 type Input map[string]interface{}
 
 const (
+	GolangErrorType   = "GolangError"
+	BadRequestType    = "BadRequest"
+	UnauthorizedType  = "Unauthorized"
+	ForbiddenType     = "Forbidden"
+	NotFoundType      = "NotFound"
+	TimeoutType       = "Timeout"
+	InternalErrorType = "InternalError"
+	NotImplementType  = "NotImplement"
+	UnavailableType   = "Unavailable"
+	UnknownErrorType  = "UnknownError"
+)
+
+const (
 	GolangErrorStatus   = 0
 	BadRequestStatus    = 400
 	UnauthorizedStatus  = 401
@@ -31,6 +44,7 @@ const (
 type AppError struct {
 	Status  int    `json:"status"`
 	Code    string `json:"code"`
+	Type    string `json:"type"`
 	Message string `json:"message"`
 	Input   Input  `json:"input"`
 	Cause   error
@@ -106,91 +120,91 @@ func Wrap(err error, AppError *AppError) error {
 }
 
 func New(msg string) error {
-	return &AppError{InternalErrorStatus, "", msg, nil, nil, nil}
+	return &AppError{Status: InternalErrorStatus, Type: InternalErrorType, Code: "", Message: msg, Input: nil, Cause: nil, stack: nil}
 }
 
 func Newf(format string, v ...interface{}) error {
-	return &AppError{InternalErrorStatus, "", fmt.Sprintf(format, v...), nil, nil, nil}
+	return &AppError{Status: InternalErrorStatus, Type: InternalErrorType, Code: "", Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
 }
 
-func Error(status int, code, msg string) *AppError {
-	return &AppError{status, code, msg, nil, nil, nil}
+func Error(status int, errorType, code, msg string) *AppError {
+	return &AppError{Status: status, Type: errorType, Code: code, Message: msg, Input: nil, Cause: nil, stack: nil}
 }
 
-func Errorf(status int, code, format string, v ...interface{}) *AppError {
-	return &AppError{status, code, fmt.Sprintf(format, v...), nil, nil, nil}
+func Errorf(status int, errorType, code, format string, v ...interface{}) *AppError {
+	return &AppError{Status: status, Type: errorType, Code: code, Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
 }
 
 func BadRequest(code, msg string) *AppError {
-	return &AppError{BadRequestStatus, code, msg, nil, nil, nil}
+	return &AppError{Status: BadRequestStatus, Type: BadRequestType, Code: code, Message: msg, Input: nil, Cause: nil, stack: nil}
 }
 
 func BadRequestf(code, format string, v ...interface{}) *AppError {
-	return &AppError{BadRequestStatus, code, fmt.Sprintf(format, v...), nil, nil, nil}
+	return &AppError{Status: BadRequestStatus, Type: BadRequestType, Code: code, Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
 }
 
 func Unauthorized(code, msg string) *AppError {
-	return &AppError{UnauthorizedStatus, code, msg, nil, nil, nil}
+	return &AppError{Status: UnauthorizedStatus, Type: UnauthorizedType, Code: code, Message: msg, Input: nil, Cause: nil, stack: nil}
 }
 
 func Unauthorizedf(code, format string, v ...interface{}) *AppError {
-	return &AppError{UnauthorizedStatus, code, fmt.Sprintf(format, v...), nil, nil, nil}
+	return &AppError{Status: UnauthorizedStatus, Type: UnauthorizedType, Code: code, Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
 }
 
 func Forbidden(code, msg string) *AppError {
-	return &AppError{ForbiddenStatus, code, msg, nil, nil, nil}
+	return &AppError{Status: ForbiddenStatus, Type: ForbiddenType, Code: code, Message: msg, Input: nil, Cause: nil, stack: nil}
 }
 
 func Forbiddenf(code, format string, v ...interface{}) *AppError {
-	return &AppError{ForbiddenStatus, code, fmt.Sprintf(format, v...), nil, nil, nil}
+	return &AppError{Status: ForbiddenStatus, Type: ForbiddenType, Code: code, Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
 }
 
 func NotFound(code, msg string) *AppError {
-	return &AppError{NotFoundStatus, code, msg, nil, nil, nil}
+	return &AppError{Status: NotFoundStatus, Type: NotFoundType, Code: code, Message: msg, Input: nil, Cause: nil, stack: nil}
 }
 
 func NotFoundf(code, format string, v ...interface{}) *AppError {
-	return &AppError{NotFoundStatus, code, fmt.Sprintf(format, v...), nil, nil, nil}
+	return &AppError{Status: NotFoundStatus, Type: NotFoundType, Code: code, Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
 }
 
 func InternalError(code, msg string) *AppError {
-	return &AppError{InternalErrorStatus, code, msg, nil, nil, nil}
+	return &AppError{Status: InternalErrorStatus, Type: InternalErrorType, Code: code, Message: msg, Input: nil, Cause: nil, stack: nil}
 }
 
 func InternalErrorf(code, format string, v ...interface{}) *AppError {
-	return &AppError{InternalErrorStatus, code, fmt.Sprintf(format, v...), nil, nil, nil}
+	return &AppError{Status: InternalErrorStatus, Type: InternalErrorType, Code: code, Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
 }
 
 func Timeout(code, msg string) *AppError {
-	return &AppError{TimeoutStatus, code, msg, nil, nil, nil}
+	return &AppError{Status: TimeoutStatus, Type: TimeoutType, Code: code, Message: msg, Input: nil, Cause: nil, stack: nil}
 }
 
 func Timeoutf(code, format string, v ...interface{}) *AppError {
-	return &AppError{TimeoutStatus, code, fmt.Sprintf(format, v...), nil, nil, nil}
+	return &AppError{Status: TimeoutStatus, Type: TimeoutType, Code: code, Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
 }
 
 func NotImplement(code, msg string) *AppError {
-	return &AppError{NotFoundStatus, code, msg, nil, nil, nil}
+	return &AppError{Status: NotFoundStatus, Type: NotImplementType, Code: code, Message: msg, Input: nil, Cause: nil, stack: nil}
 }
 
 func NotImplementf(code, format string, v ...interface{}) *AppError {
-	return &AppError{NotFoundStatus, code, fmt.Sprintf(format, v...), nil, nil, nil}
+	return &AppError{Status: NotFoundStatus, Type: NotImplementType, Code: code, Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
 }
 
 func Unavailable(code, msg string) *AppError {
-	return &AppError{UnavailableStatus, code, msg, nil, nil, nil}
+	return &AppError{Status: UnavailableStatus, Type: UnavailableType, Code: code, Message: msg, Input: nil, Cause: nil, stack: nil}
 }
 
 func Unavailablef(code, format string, v ...interface{}) *AppError {
-	return &AppError{UnavailableStatus, code, fmt.Sprintf(format, v...), nil, nil, nil}
+	return &AppError{Status: UnavailableStatus, Type: UnavailableType, Code: code, Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
 }
 
 func UnknownError(code, msg string) *AppError {
-	return &AppError{UnknownErrorStatus, code, msg, nil, nil, nil}
+	return &AppError{Status: UnknownErrorStatus, Type: UnknownErrorType, Code: code, Message: msg, Input: nil, Cause: nil, stack: nil}
 }
 
 func UnknownErrorf(code, format string, v ...interface{}) *AppError {
-	return &AppError{UnknownErrorStatus, code, fmt.Sprintf(format, v...), nil, nil, nil}
+	return &AppError{Status: UnknownErrorStatus, Type: UnknownErrorType, Code: code, Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
 }
 
 func WithCaller(err error) *AppError {
@@ -200,7 +214,7 @@ func WithCaller(err error) *AppError {
 
 	herr, ok := err.(*AppError)
 	if !ok {
-		appErr := &AppError{InternalErrorStatus, "", err.Error(), nil, nil, nil}
+		appErr := &AppError{Status: InternalErrorStatus, Type: InternalErrorType, Code: "", Message: err.Error(), Input: nil, Cause: nil, stack: nil}
 		appErr.WithCallerSkip(2)
 		return appErr
 	}
