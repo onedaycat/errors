@@ -12,33 +12,33 @@ type options struct {
 	extra      raven.Extra
 }
 
-type option func(o *options)
+type Option func(o *options)
 
-func WithEnv(env string) option {
+func WithEnv(env string) Option {
 	return func(o *options) {
 		o.env = env
 	}
 }
 
-func WithTags(tags Tags) option {
+func WithTags(tags Tags) Option {
 	return func(o *options) {
 		o.tags = raven.Tags(tags)
 	}
 }
 
-func WithDefaultExtra(extra Extra) option {
+func WithDefaultExtra(extra Extra) Option {
 	return func(o *options) {
 		o.extra = raven.Extra(extra)
 	}
 }
 
-func WithServerName(serverName string) option {
+func WithServerName(serverName string) Option {
 	return func(o *options) {
 		o.serverName = serverName
 	}
 }
 
-func WithRelease(release string) option {
+func WithRelease(release string) Option {
 	return func(o *options) {
 		o.release = release
 	}

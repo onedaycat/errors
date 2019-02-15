@@ -11,6 +11,7 @@ const (
 var defaultOption = &options{}
 
 type Tags = raven.Tags
+type Tag = raven.Tag
 type Extra = raven.Extra
 
 type User struct {
@@ -33,7 +34,7 @@ func SetDSN(dsn string) {
 	raven.SetDSN(dsn)
 }
 
-func SetOptions(option ...option) {
+func SetOptions(option ...Option) {
 	for _, opt := range option {
 		opt(defaultOption)
 	}
@@ -68,6 +69,10 @@ func (p *Packet) AddExtra(extra Extra) {
 	if extra != nil {
 		mergeExtra(p.packet.Extra, extra)
 	}
+}
+
+func (p *Packet) AddTag(key, value string) {
+	p.packet.Tags = append(p.packet.Tags, Tag{key, value})
 }
 
 func (p *Packet) AddStackTrace(stack *raven.Stacktrace) {
