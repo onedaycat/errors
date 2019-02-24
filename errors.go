@@ -60,6 +60,15 @@ func (e *AppError) Error() string {
 	return e.Code + ": " + e.Message
 }
 
+// String interface
+func (e *AppError) String() string {
+	if e.Code == "" {
+		return e.Message
+	}
+
+	return e.Code + ": " + e.Message
+}
+
 // Stack return Sentry Stack trace
 func (e *AppError) StackTrace() *raven.Stacktrace { return e.stack }
 
