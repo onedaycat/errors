@@ -101,22 +101,20 @@ func (e *AppError) WithInput(input Input) *AppError {
 func (e *AppError) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
-		if e.stack != nil {
-			fmt.Fprintln(s, e.Error())
-			if e.Cause != nil {
-				fmt.Fprintln(s, e.Cause.Error())
-			}
-			if s.Flag('+') {
-				for _, frame := range e.stack.Frames {
-					fmt.Fprintf(s, "%s:%d\t%s\n", frame.Function, frame.Lineno, frame.AbsolutePath)
-				}
-			}
-		} else {
-			io.WriteString(s, e.Error())
+		io.WriteString(s, e.Error())
+
+		if s.Flag('+') {
 			if e.Cause != nil {
 				fmt.Fprintf(s, "\n%s", e.Cause.Error())
 			}
+			if e.stack != nil {
+				// fmt.Fprintln(s)
+				for _, frame := range e.stack.Frames {
+					fmt.Fprintf(s, "\n%s:%d\t%s", frame.Function, frame.Lineno, frame.AbsolutePath)
+				}
+			}
 		}
+
 	case 's':
 		io.WriteString(s, e.Error())
 	case 'q':
