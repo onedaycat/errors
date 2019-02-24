@@ -61,6 +61,10 @@ func NewPacket(err error) *Packet {
 	return p
 }
 
+func (p *Packet) SetFingerprint(fingerprints ...string) {
+	p.packet.Fingerprint = fingerprints
+}
+
 func (p *Packet) AddUser(user *User) {
 	p.packet.Extra["user"] = user
 }
