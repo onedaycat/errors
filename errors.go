@@ -14,6 +14,14 @@ var (
 
 type Input map[string]interface{}
 
+func NewInput() Input {
+	return make(map[string]interface{})
+}
+
+func (i Input) Set(key string, value interface{}) {
+	i[key] = value
+}
+
 const (
 	GolangErrorType   = "GolangError"
 	BadRequestType    = "BadRequest"
@@ -42,11 +50,11 @@ const (
 
 // AppError error
 type AppError struct {
-	Status  int    `json:"status"`
-	Code    string `json:"code"`
-	Type    string `json:"type"`
-	Message string `json:"message"`
-	Input   Input  `json:"input"`
+	Status  int         `json:"status"`
+	Code    string      `json:"code"`
+	Type    string      `json:"type"`
+	Message string      `json:"message"`
+	Input   interface{} `json:"input"`
 	Cause   error
 	stack   *raven.Stacktrace
 }
@@ -93,7 +101,7 @@ func (e *AppError) WithCallerSkip(skip int) *AppError {
 }
 
 // WithInput add input
-func (e *AppError) WithInput(input Input) *AppError {
+func (e *AppError) WithInput(input interface{}) *AppError {
 	e.Input = input
 	return e
 }
