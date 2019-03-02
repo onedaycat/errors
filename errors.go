@@ -79,7 +79,7 @@ func (e *AppError) String() string {
 }
 
 // Stack return Sentry Stack trace
-func (e *AppError) StackTrace() raven.Interface { return e.stack }
+func (e *AppError) StackTrace() raven.Interface { return e.excaption }
 
 // WithCause error
 func (e *AppError) WithCause(err error) *AppError {
