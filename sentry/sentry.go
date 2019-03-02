@@ -54,7 +54,7 @@ func NewPacket(err error) *Packet {
 			ServerName:  defaultOption.serverName,
 			Release:     defaultOption.release,
 			Logger:      defaultOption.logger,
-			Fingerprint: make([]string, 0, 4),
+			Fingerprint: make([]string, 1, 4),
 		},
 	}
 
