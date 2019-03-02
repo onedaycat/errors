@@ -8,7 +8,9 @@ const (
 	_platform = "go"
 )
 
-var defaultOption = &options{}
+var defaultOption = &options{
+	logger: "root",
+}
 
 type Tags = raven.Tags
 type Tag = raven.Tag
@@ -52,9 +54,11 @@ func NewPacket(err error) *Packet {
 			ServerName:  defaultOption.serverName,
 			Release:     defaultOption.release,
 			Logger:      defaultOption.logger,
+			Fingerprint: make([]string, 0, 4),
 		},
 	}
 
+	p.packet.Fingerprint[0] = defaultOption.logger
 	if defaultOption.extra != nil {
 		mergeExtra(p.packet.Extra, defaultOption.extra)
 	}
@@ -71,7 +75,7 @@ func (p *Packet) SetCulprit(culprit string) {
 }
 
 func (p *Packet) SetFingerprint(fingerprints ...string) {
-	p.packet.Fingerprint = fingerprints
+	p.packet.Fingerprint = append(p.packet.Fingerprint, fingerprints...)
 }
 
 func (p *Packet) AddUser(user *User) {
