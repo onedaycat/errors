@@ -39,9 +39,9 @@ func WithServerName(serverName string) Option {
 	}
 }
 
-func WithLogger(logger string) Option {
+func WithServiceName(serviceName string) Option {
 	return func(o *options) {
-		o.logger = logger
+		o.logger = serviceName
 	}
 }
 
