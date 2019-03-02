@@ -51,6 +51,7 @@ func NewPacket(err error) *Packet {
 			Environment: defaultOption.env,
 			ServerName:  defaultOption.serverName,
 			Release:     defaultOption.release,
+			Logger:      defaultOption.logger,
 		},
 	}
 
@@ -59,6 +60,14 @@ func NewPacket(err error) *Packet {
 	}
 
 	return p
+}
+
+func (p *Packet) RawPacket() *raven.Packet {
+	return p.packet
+}
+
+func (p *Packet) SetCulprit(culprit string) {
+	p.packet.Culprit = culprit
 }
 
 func (p *Packet) SetFingerprint(fingerprints ...string) {
@@ -79,7 +88,7 @@ func (p *Packet) AddTag(key, value string) {
 	p.packet.Tags = append(p.packet.Tags, Tag{key, value})
 }
 
-func (p *Packet) AddStackTrace(stack *raven.Stacktrace) {
+func (p *Packet) AddStackTrace(stack raven.Interface) {
 	if stack != nil {
 		p.packet.Interfaces = append(p.packet.Interfaces, stack)
 	}

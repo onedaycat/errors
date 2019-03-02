@@ -50,13 +50,14 @@ const (
 
 // AppError error
 type AppError struct {
-	Status  int         `json:"status"`
-	Code    string      `json:"code"`
-	Type    string      `json:"type"`
-	Message string      `json:"message"`
-	Input   interface{} `json:"input"`
-	Cause   error
-	stack   *raven.Stacktrace
+	Status    int         `json:"status"`
+	Code      string      `json:"code"`
+	Type      string      `json:"type"`
+	Message   string      `json:"message"`
+	Input     interface{} `json:"input"`
+	Cause     error
+	stack     *raven.Stacktrace
+	excaption raven.Interface
 }
 
 // Error error
@@ -78,7 +79,7 @@ func (e *AppError) String() string {
 }
 
 // Stack return Sentry Stack trace
-func (e *AppError) StackTrace() *raven.Stacktrace { return e.stack }
+func (e *AppError) StackTrace() raven.Interface { return e.stack }
 
 // WithCause error
 func (e *AppError) WithCause(err error) *AppError {
@@ -89,6 +90,19 @@ func (e *AppError) WithCause(err error) *AppError {
 // WithCause error
 func (e *AppError) WithCaller() *AppError {
 	e.stack = raven.NewStacktrace(TraceSkipFrames, TraceContextLines, nil)
+	if e.Cause != nil {
+		e.excaption = &raven.Exception{
+			Stacktrace: e.stack,
+			Value:      e.Cause.Error(),
+			Type:       e.Code,
+		}
+	} else {
+		e.excaption = &raven.Exception{
+			Stacktrace: e.stack,
+			Value:      e.Error(),
+			Type:       e.Code,
+		}
+	}
 
 	return e
 }

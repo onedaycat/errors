@@ -8,6 +8,7 @@ type options struct {
 	serverName string
 	release    string
 	env        string
+	logger     string
 	tags       raven.Tags
 	extra      raven.Extra
 }
@@ -35,6 +36,12 @@ func WithDefaultExtra(extra Extra) Option {
 func WithServerName(serverName string) Option {
 	return func(o *options) {
 		o.serverName = serverName
+	}
+}
+
+func WithLogger(logger string) Option {
+	return func(o *options) {
+		o.logger = logger
 	}
 }
 

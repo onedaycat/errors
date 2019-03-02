@@ -17,46 +17,9 @@
   pruneopts = "UT"
   revision = "67f8d30e8de7d9c3e2733eb8e17e0e3eb0b5632e"
 
-[[projects]]
-  digest = "1:4c0989ca0bcd10799064318923b9bc2db6b4d6338dd75f3f2d86c3511aaaf5cf"
-  name = "github.com/golang/protobuf"
-  packages = [
-    "proto",
-    "ptypes",
-    "ptypes/any",
-    "ptypes/duration",
-    "ptypes/timestamp",
-  ]
-  pruneopts = "UT"
-  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
-  version = "v1.2.0"
-
-[[projects]]
-  branch = "master"
-  digest = "1:077c1c599507b3b3e9156d17d36e1e61928ee9b53a5b420f10f28ebd4a0b275c"
-  name = "google.golang.org/genproto"
-  packages = ["googleapis/rpc/status"]
-  pruneopts = "UT"
-  revision = "082222b4a5c572e33e82ee9162d1352c7cf38682"
-
-[[projects]]
-  digest = "1:4a251721b698c0e6285aec21d4ba3f79ddeccd903690144461b360ea7f948106"
-  name = "google.golang.org/grpc"
-  packages = [
-    "codes",
-    "status",
-  ]
-  pruneopts = "UT"
-  revision = "a02b0774206b209466313a0b525d2c738fe407eb"
-  version = "v1.18.0"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = [
-    "github.com/getsentry/raven-go",
-    "google.golang.org/grpc/codes",
-    "google.golang.org/grpc/status",
-  ]
+  input-imports = ["github.com/getsentry/raven-go"]
   solver-name = "gps-cdcl"
   solver-version = 1
