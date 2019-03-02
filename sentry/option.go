@@ -45,6 +45,18 @@ func WithServiceName(serviceName string) Option {
 	}
 }
 
+func WithVersion(version string) Option {
+	return func(o *options) {
+		if o.tags == nil {
+			o.tags = Tags{
+				{"version", version},
+			}
+		} else {
+			o.tags = append(o.tags, Tag{"version", version})
+		}
+	}
+}
+
 func WithRelease(release string) Option {
 	return func(o *options) {
 		o.release = release
