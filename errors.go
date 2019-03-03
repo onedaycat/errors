@@ -55,6 +55,7 @@ type AppError struct {
 	Type    string      `json:"type"`
 	Message string      `json:"message"`
 	Input   interface{} `json:"input"`
+	Panic   bool
 	Cause   error
 	stack   *raven.Stacktrace
 }
@@ -92,6 +93,11 @@ func (e *AppError) StackTrace() raven.Interface {
 		Value:      e.Error(),
 		Type:       e.Code,
 	}
+}
+
+func (e *AppError) WithPanic() *AppError {
+	e.Panic = true
+	return e
 }
 
 // WithCause error
