@@ -48,6 +48,26 @@ const (
 	UnknownErrorStatus  = 520
 )
 
+type Error interface {
+	Error() string
+	String() string
+	StackTrace() raven.Interface
+	WithPanic() *AppError
+	WithCause(err error) *AppError
+	WithCaller() *AppError
+	WithCallerSkip(skip int) *AppError
+	WithInput(input interface{}) *AppError
+	Format(s fmt.State, verb rune)
+	StackStrings() []string
+	GetStatus() int
+	GetCode() string
+	GetType() string
+	GetMessage() string
+	GetInput() interface{}
+	GetPanic() bool
+	GetCause() error
+}
+
 // AppError error
 type AppError struct {
 	Status  int         `json:"status"`
@@ -67,6 +87,34 @@ func (e *AppError) Error() string {
 	}
 
 	return e.Code + ": " + e.Message
+}
+
+func (e *AppError) GetStatus() int {
+	return e.Status
+}
+
+func (e *AppError) GetCode() string {
+	return e.Code
+}
+
+func (e *AppError) GetType() string {
+	return e.Type
+}
+
+func (e *AppError) GetMessage() string {
+	return e.Message
+}
+
+func (e *AppError) GetInput() interface{} {
+	return e.Input
+}
+
+func (e *AppError) GetPanic() bool {
+	return e.Panic
+}
+
+func (e *AppError) GetCause() error {
+	return e.Cause
 }
 
 // String interface
@@ -177,11 +225,11 @@ func Newf(format string, v ...interface{}) error {
 	return &AppError{Status: InternalErrorStatus, Type: InternalErrorType, Code: "", Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
 }
 
-func Error(status int, errorType, code, msg string) *AppError {
+func NewError(status int, errorType, code, msg string) *AppError {
 	return &AppError{Status: status, Type: errorType, Code: code, Message: msg, Input: nil, Cause: nil, stack: nil}
 }
 
-func Errorf(status int, errorType, code, format string, v ...interface{}) *AppError {
+func NewErrorf(status int, errorType, code, format string, v ...interface{}) *AppError {
 	return &AppError{Status: status, Type: errorType, Code: code, Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
 }
 
