@@ -32,7 +32,7 @@ func WithContext(ctx context.Context) (*Group, context.Context) {
 
 // Wait blocks until all function calls from the Go method have returned, then
 // returns the first non-nil error (if any) from them.
-func (g *Group) Wait() error {
+func (g *Group) Wait() errors.Error {
 	g.wg.Wait()
 	if g.cancel != nil {
 		g.cancel()
