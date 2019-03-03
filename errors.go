@@ -57,8 +57,13 @@ type Error interface {
 	WithCaller() *AppError
 	WithCallerSkip(skip int) *AppError
 	WithInput(input interface{}) *AppError
+	WithStatus(status int) *AppError
+	WithCode(code string) *AppError
+	WithType(errType string) *AppError
+	WithMessage(msg string) *AppError
 	Format(s fmt.State, verb rune)
 	StackStrings() []string
+
 	GetStatus() int
 	GetCode() string
 	GetType() string
@@ -143,6 +148,26 @@ func (e *AppError) StackTrace() raven.Interface {
 	}
 }
 
+func (e *AppError) WithStatus(status int) *AppError {
+	e.Status = status
+	return e
+}
+
+func (e *AppError) WithCode(code string) *AppError {
+	e.Code = code
+	return e
+}
+
+func (e *AppError) WithType(errType string) *AppError {
+	e.Type = errType
+	return e
+}
+
+func (e *AppError) WithMessage(msg string) *AppError {
+	e.Message = msg
+	return e
+}
+
 func (e *AppError) WithPanic() *AppError {
 	e.Panic = true
 	return e
@@ -209,7 +234,15 @@ func (e *AppError) StackStrings() []string {
 	return stacks
 }
 
-func Wrap(err error, AppError *AppError) error {
+func Wrap(err error) Error {
+	if err == nil {
+		return nil
+	}
+
+	return New(err.Error())
+}
+
+func Convert(err error, AppError *AppError) Error {
 	if err != nil {
 		return nil
 	}
