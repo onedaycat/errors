@@ -144,7 +144,7 @@ func (e *AppError) Format(s fmt.State, verb rune) {
 	}
 }
 
-func (e *AppError) PrintStack() []string {
+func (e *AppError) StackStrings() []string {
 	stacks := make([]string, 0, 30)
 	stacks = append(stacks, e.Error())
 	if e.Cause != nil {
