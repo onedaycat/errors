@@ -144,6 +144,22 @@ func (e *AppError) Format(s fmt.State, verb rune) {
 	}
 }
 
+func (e *AppError) PrintStack() []string {
+	stacks := make([]string, 0, 30)
+	stacks = append(stacks, e.Error())
+	if e.Cause != nil {
+		stacks = append(stacks, e.Cause.Error())
+	}
+
+	if e.stack != nil {
+		for _, frame := range e.stack.Frames {
+			stacks = append(stacks, fmt.Sprintf("%s:%d %s", frame.Function, frame.Lineno, frame.AbsolutePath))
+		}
+	}
+
+	return stacks
+}
+
 func Wrap(err error, AppError *AppError) error {
 	if err != nil {
 		return nil
