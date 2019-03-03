@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -149,6 +150,11 @@ func (e *AppError) StackStrings() []string {
 	stacks = append(stacks, e.Error())
 	if e.Cause != nil {
 		stacks = append(stacks, e.Cause.Error())
+	}
+
+	if e.Input != nil {
+		inputJSON, _ := json.Marshal(e.Input)
+		stacks = append(stacks, string(inputJSON))
 	}
 
 	if e.stack != nil {
