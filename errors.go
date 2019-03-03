@@ -217,11 +217,11 @@ func Wrap(err error, AppError *AppError) error {
 	return AppError.WithCause(err)
 }
 
-func New(msg string) error {
+func New(msg string) *AppError {
 	return &AppError{Status: InternalErrorStatus, Type: InternalErrorType, Code: "", Message: msg, Input: nil, Cause: nil, stack: nil}
 }
 
-func Newf(format string, v ...interface{}) error {
+func Newf(format string, v ...interface{}) *AppError {
 	return &AppError{Status: InternalErrorStatus, Type: InternalErrorType, Code: "", Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
 }
 
