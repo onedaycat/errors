@@ -51,7 +51,7 @@ const (
 type Error interface {
 	Error() string
 	String() string
-	StackTrace() raven.Interface
+	StackTrace() *raven.Stacktrace
 	WithPanic() *AppError
 	WithCause(err error) *AppError
 	WithCaller() *AppError
@@ -61,6 +61,13 @@ type Error interface {
 	WithCode(code string) *AppError
 	WithType(errType string) *AppError
 	WithMessage(msg string) *AppError
+	WithNotFound() *AppError
+	WithBadRequest() *AppError
+	WithUnauthorized() *AppError
+	WithForbidden() *AppError
+	WithInternalError() *AppError
+	WithTimeoutError() *AppError
+	WithUnknownError() *AppError
 	Format(s fmt.State, verb rune)
 	StackStrings() []string
 
@@ -132,20 +139,8 @@ func (e *AppError) String() string {
 }
 
 // Stack return Sentry Stack trace
-func (e *AppError) StackTrace() raven.Interface {
-	if e.Cause != nil {
-		return &raven.Exception{
-			Stacktrace: e.stack,
-			Value:      e.Cause.Error(),
-			Type:       e.Code,
-		}
-	}
-
-	return &raven.Exception{
-		Stacktrace: e.stack,
-		Value:      e.Error(),
-		Type:       e.Code,
-	}
+func (e *AppError) StackTrace() *raven.Stacktrace {
+	return e.stack
 }
 
 func (e *AppError) WithStatus(status int) *AppError {
@@ -190,6 +185,48 @@ func (e *AppError) WithCaller() *AppError {
 func (e *AppError) WithCallerSkip(skip int) *AppError {
 	e.stack = raven.NewStacktrace(skip, TraceContextLines, nil)
 
+	return e
+}
+
+func (e *AppError) WithNotFound() *AppError {
+	e.Status = NotFoundStatus
+	e.Type = NotFoundType
+	return e
+}
+
+func (e *AppError) WithBadRequest() *AppError {
+	e.Status = NotFoundStatus
+	e.Type = NotFoundType
+	return e
+}
+
+func (e *AppError) WithUnauthorized() *AppError {
+	e.Status = UnauthorizedStatus
+	e.Type = UnauthorizedType
+	return e
+}
+
+func (e *AppError) WithForbidden() *AppError {
+	e.Status = ForbiddenStatus
+	e.Type = ForbiddenType
+	return e
+}
+
+func (e *AppError) WithInternalError() *AppError {
+	e.Status = InternalErrorStatus
+	e.Type = InternalErrorType
+	return e
+}
+
+func (e *AppError) WithTimeoutError() *AppError {
+	e.Status = TimeoutStatus
+	e.Type = TimeoutType
+	return e
+}
+
+func (e *AppError) WithUnknownError() *AppError {
+	e.Status = UnknownErrorStatus
+	e.Type = UnknownErrorType
 	return e
 }
 
@@ -251,11 +288,12 @@ func Convert(err error, AppError *AppError) Error {
 }
 
 func New(msg string) *AppError {
-	return &AppError{Status: InternalErrorStatus, Type: InternalErrorType, Code: "", Message: msg, Input: nil, Cause: nil, stack: nil}
+	return &AppError{Status: InternalErrorStatus, Type: InternalErrorType, Code: msg, Message: msg, Input: nil, Cause: nil, stack: nil}
 }
 
 func Newf(format string, v ...interface{}) *AppError {
-	return &AppError{Status: InternalErrorStatus, Type: InternalErrorType, Code: "", Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
+	msg := fmt.Sprintf(format, v...)
+	return &AppError{Status: InternalErrorStatus, Type: InternalErrorType, Code: msg, Message: msg, Input: nil, Cause: nil, stack: nil}
 }
 
 func NewError(status int, errorType, code, msg string) *AppError {
@@ -345,9 +383,7 @@ func WithCaller(err error) *AppError {
 
 	herr, ok := err.(*AppError)
 	if !ok {
-		appErr := &AppError{Status: InternalErrorStatus, Type: InternalErrorType, Code: "", Message: err.Error(), Input: nil, Cause: nil, stack: nil}
-		appErr.WithCallerSkip(2)
-		return appErr
+		return New(err.Error()).WithCallerSkip(2)
 	}
 
 	return herr.WithCallerSkip(2)
@@ -376,22 +412,22 @@ func ErrStatus(err error) int {
 	return herr.Status
 }
 
-func IsNotFound(err error) bool {
-	return err != nil && ErrStatus(err) == 404
+func IsNotFound(err Error) bool {
+	return err != nil && err.GetStatus() == 404
 }
 
-func IsInternalError(err error) bool {
-	return err != nil && ErrStatus(err) == 500
+func IsInternalError(err Error) bool {
+	return err != nil && err.GetStatus() == 500
 }
 
-func IsBadRequest(err error) bool {
-	return err != nil && ErrStatus(err) == 400
+func IsBadRequest(err Error) bool {
+	return err != nil && err.GetStatus() == 400
 }
 
-func IsUnauthorized(err error) bool {
-	return err != nil && ErrStatus(err) == 401
+func IsUnauthorized(err Error) bool {
+	return err != nil && err.GetStatus() == 401
 }
 
-func IsForbidden(err error) bool {
-	return err != nil && ErrStatus(err) == 403
+func IsForbidden(err Error) bool {
+	return err != nil && err.GetStatus() == 403
 }

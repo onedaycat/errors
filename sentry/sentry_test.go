@@ -1,6 +1,7 @@
 package sentry
 
 import (
+	errs "errors"
 	"os"
 	"testing"
 
@@ -13,6 +14,7 @@ func TestCaptureAndWait(t *testing.T) {
 		WithEnv("dev"),
 		WithRelease("1.0.0"),
 		WithServerName("Test Sentry"),
+		WithServiceName("test1"),
 		WithTags(Tags{
 			{"tag1", "vtag1"},
 		}),
@@ -21,12 +23,16 @@ func TestCaptureAndWait(t *testing.T) {
 		}),
 	)
 
-	err := errors.InternalError("1000", "Test Sentry Error").WithCaller().WithInput(errors.Input{
+	xer := errs.New("database connectio lost")
+
+	der := errors.WithCaller(errs.New("gogo")).WithCause(xer)
+
+	err := errors.InternalError("ErrUnableSomething", "Test Sentry Error").WithCaller().WithInput(errors.Input{
 		"input1": "vinput1",
-	})
+	}).WithCause(der)
 
 	p := NewPacket(err)
-	p.AddStackTrace(err.StackTrace())
+	p.AddError(err)
 	p.AddUser(&User{
 		ID: "tester",
 	})

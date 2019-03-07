@@ -2,6 +2,7 @@ package sentry
 
 import (
 	raven "github.com/getsentry/raven-go"
+	"github.com/onedaycat/errors"
 )
 
 const (
@@ -54,7 +55,7 @@ func NewPacket(err error) *Packet {
 			ServerName:  defaultOption.serverName,
 			Release:     defaultOption.release,
 			Logger:      defaultOption.logger,
-			Fingerprint: make([]string, 1, 4),
+			Fingerprint: make([]string, 1, 5),
 		},
 	}
 
@@ -68,6 +69,10 @@ func NewPacket(err error) *Packet {
 
 func (p *Packet) RawPacket() *raven.Packet {
 	return p.packet
+}
+
+func (p *Packet) SetMessage(msg string) {
+	p.packet.Message = msg
 }
 
 func (p *Packet) SetCulprit(culprit string) {
@@ -96,6 +101,58 @@ func (p *Packet) AddStackTrace(stack raven.Interface) {
 	if stack != nil {
 		p.packet.Interfaces = append(p.packet.Interfaces, stack)
 	}
+}
+
+func (p *Packet) AddError(err errors.Error) {
+	expList := make([]*raven.Exception, 0, 2)
+
+	expList = append(expList, &raven.Exception{
+		Stacktrace: err.StackTrace(),
+		Value:      err.GetMessage(),
+		Type:       err.GetCode(),
+	})
+	lastError := expList[0].Value
+
+	var cause error
+	cause = err.GetCause()
+	for {
+		if cause != nil {
+			herr, ok := cause.(*errors.AppError)
+			if ok {
+				cause = herr.Cause
+				msg := herr.GetMessage()
+				expList = append(expList, &raven.Exception{
+					Stacktrace: herr.StackTrace(),
+					Value:      msg,
+					Type:       herr.GetCode(),
+				})
+				lastError = msg
+			} else {
+				msg := cause.Error()
+				expList = append(expList, &raven.Exception{
+					Value: msg,
+					Type:  msg,
+				})
+				lastError = msg
+				break
+			}
+		} else {
+			break
+		}
+	}
+
+	exps := &raven.Exceptions{
+		Values: make([]*raven.Exception, len(expList)),
+	}
+
+	n := len(expList)
+	for i := 0; i < n; i++ {
+		exps.Values[n-i-1] = expList[i]
+		p.packet.Fingerprint = append(p.packet.Fingerprint, expList[i].Type)
+	}
+
+	p.packet.Culprit = lastError
+	p.packet.Interfaces = append(p.packet.Interfaces, exps)
 }
 
 func Capture(packet *Packet) {
