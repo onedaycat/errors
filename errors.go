@@ -281,12 +281,12 @@ func Wrap(err error) Error {
 	return New(err.Error())
 }
 
-func Convert(err error, AppError *AppError) Error {
-	if err != nil {
+func Convert(goerr error, err Error) Error {
+	if goerr == nil {
 		return nil
 	}
 
-	return AppError.WithCause(err)
+	return err.WithCause(goerr)
 }
 
 func New(msg string) *AppError {
