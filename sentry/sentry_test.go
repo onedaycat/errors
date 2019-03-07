@@ -25,7 +25,10 @@ func TestCaptureAndWait(t *testing.T) {
 
 	xer := errs.New("database connectio lost")
 
-	der := errors.WithCaller(errs.New("gogo")).WithCause(xer)
+	der := errors.WithCaller(errs.New("Unable to apply events")).WithCause(xer).WithInput(map[string]interface{}{
+		"id":   1,
+		"name": "tester",
+	})
 
 	err := errors.InternalError("ErrUnableSomething", "Test Sentry Error").WithCaller().WithInput(errors.Input{
 		"input1": "vinput1",
@@ -35,9 +38,6 @@ func TestCaptureAndWait(t *testing.T) {
 	p.AddError(err)
 	p.AddUser(&User{
 		ID: "tester",
-	})
-	p.AddExtra(Extra{
-		"input": err.Input,
 	})
 
 	CaptureAndWait(p)

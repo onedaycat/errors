@@ -111,6 +111,12 @@ func (p *Packet) AddError(err errors.Error) {
 		Value:      err.GetMessage(),
 		Type:       err.GetCode(),
 	})
+
+	input := err.GetInput()
+	if input != nil {
+		p.AddExtra(Extra{expList[0].Type: input})
+	}
+
 	lastError := expList[0].Value
 
 	var cause error
@@ -126,6 +132,12 @@ func (p *Packet) AddError(err errors.Error) {
 					Value:      msg,
 					Type:       herr.GetCode(),
 				})
+
+				input := herr.GetInput()
+				if input != nil {
+					p.AddExtra(Extra{herr.GetCode(): input})
+				}
+
 				lastError = msg
 			} else {
 				msg := cause.Error()
@@ -133,6 +145,7 @@ func (p *Packet) AddError(err errors.Error) {
 					Value: msg,
 					Type:  msg,
 				})
+
 				lastError = msg
 				break
 			}
