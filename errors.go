@@ -12,6 +12,8 @@ var (
 	TraceSkipFrames   = 1
 )
 
+var DumpError = InternalError("DUMP", "Error Dump")
+
 type Input map[string]interface{}
 
 func NewInput() Input {
