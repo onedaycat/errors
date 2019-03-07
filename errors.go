@@ -414,22 +414,22 @@ func ErrStatus(err error) int {
 	return herr.Status
 }
 
-func IsNotFound(err *AppError) bool {
-	return err != nil && err.Status == 404
+func IsNotFound(err Error) bool {
+	return err != nil && err.GetStatus() == 404
 }
 
-func IsInternalError(err *AppError) bool {
-	return err != nil && err.Status == 500
+func IsInternalError(err Error) bool {
+	return err != nil && err.GetStatus() == 500
 }
 
-func IsBadRequest(err *AppError) bool {
-	return err != nil && err.Status == 400
+func IsBadRequest(err Error) bool {
+	return err != nil && err.GetStatus() == 400
 }
 
-func IsUnauthorized(err *AppError) bool {
-	return err != nil && err.Status == 401
+func IsUnauthorized(err Error) bool {
+	return err != nil && err.GetStatus() == 401
 }
 
-func IsForbidden(err *AppError) bool {
-	return err != nil && err.Status == 403
+func IsForbidden(err Error) bool {
+	return err != nil && err.GetStatus() == 403
 }
