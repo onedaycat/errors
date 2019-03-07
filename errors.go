@@ -12,7 +12,7 @@ var (
 	TraceSkipFrames   = 1
 )
 
-var DumpError = InternalError("DUMP", "Error Dump")
+var DumbError = InternalError("DUMB", "Dumb Error")
 
 type Input map[string]interface{}
 
