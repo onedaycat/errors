@@ -3,6 +3,7 @@ package errors
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/getsentry/raven-go"
 )
@@ -10,6 +11,7 @@ import (
 var (
 	TraceContextLines = 3
 	TraceSkipFrames   = 1
+	delim             = ": "
 )
 
 var DumbError = InternalError("DUMB", "Dumb Error")
@@ -100,7 +102,7 @@ func (e *AppError) Error() string {
 		return e.Message
 	}
 
-	return e.Code + ": " + e.Message
+	return e.Code + delim + e.Message
 }
 
 func (e *AppError) GetStatus() int {
@@ -137,7 +139,7 @@ func (e *AppError) String() string {
 		return e.Message
 	}
 
-	return e.Code + ": " + e.Message
+	return e.Code + delim + e.Message
 }
 
 // Stack return Sentry Stack trace
@@ -376,6 +378,15 @@ func UnknownError(code, msg string) *AppError {
 
 func UnknownErrorf(code, format string, v ...interface{}) *AppError {
 	return &AppError{Status: UnknownErrorStatus, Type: UnknownErrorType, Code: code, Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
+}
+
+func ParseError(errStr string) *AppError {
+	es := strings.SplitN(errStr, delim, 1)
+	if len(es) == 2 {
+		return UnknownError(es[0], es[1])
+	}
+
+	return UnknownError(errStr, errStr)
 }
 
 func WithCaller(err error) *AppError {
