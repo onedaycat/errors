@@ -381,7 +381,7 @@ func UnknownErrorf(code, format string, v ...interface{}) *AppError {
 }
 
 func ParseError(errStr string) *AppError {
-	es := strings.SplitN(errStr, delim, 1)
+	es := strings.SplitN(errStr, delim, 2)
 	if len(es) == 2 {
 		return UnknownError(es[0], es[1])
 	}
