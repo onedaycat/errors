@@ -143,7 +143,7 @@ func (p *Packet) AddError(err errors.Error) {
 				msg := cause.Error()
 				expList = append(expList, &raven.Exception{
 					Value: msg,
-					Type:  msg,
+					Type:  errors.GolangErrorType,
 				})
 
 				lastError = msg
