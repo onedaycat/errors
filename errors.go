@@ -246,13 +246,19 @@ func (e *AppError) Format(s fmt.State, verb rune) {
 		io.WriteString(s, e.Error())
 
 		if s.Flag('+') {
-			if e.Cause != nil {
-				fmt.Fprintf(s, "\n%s", e.Cause.Error())
-			}
 			if e.stack != nil {
 				// fmt.Fprintln(s)
 				for _, frame := range e.stack.Frames {
-					fmt.Fprintf(s, "\n%s:%d\t%s", frame.Function, frame.Lineno, frame.AbsolutePath)
+					fmt.Fprintf(s, "\n%s\t%s:%d", frame.Function, frame.AbsolutePath, frame.Lineno)
+				}
+			}
+
+			if e.Cause != nil {
+				herr, ok := e.Cause.(Error)
+				if ok {
+					fmt.Fprintf(s, "\n\n%+v\n", herr)
+				} else {
+					fmt.Fprintf(s, "\n%s", e.Cause.Error())
 				}
 			}
 		}
