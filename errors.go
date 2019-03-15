@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -175,6 +176,12 @@ func (e *AppError) WithPanic() *AppError {
 // WithCause error
 func (e *AppError) WithCause(err error) *AppError {
 	e.Cause = err
+	return e
+}
+
+// WithCauseMessage error
+func (e *AppError) WithCauseMessage(msg string) *AppError {
+	e.Cause = errors.New(msg)
 	return e
 }
 
