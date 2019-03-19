@@ -393,6 +393,15 @@ func UnknownErrorf(code, format string, v ...interface{}) *AppError {
 	return &AppError{Status: UnknownErrorStatus, Type: UnknownErrorType, Code: code, Message: fmt.Sprintf(format, v...), Input: nil, Cause: nil, stack: nil}
 }
 
+func ParseErrorMessage(errStr string) (string, string) {
+	es := strings.SplitN(errStr, delim, 2)
+	if len(es) == 2 {
+		return es[0], es[1]
+	}
+
+	return "", errStr
+}
+
 func ParseError(errStr string) *AppError {
 	es := strings.SplitN(errStr, delim, 2)
 	if len(es) == 2 {
