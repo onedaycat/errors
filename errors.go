@@ -91,9 +91,9 @@ type AppError struct {
 	Code    string      `json:"code,omitempty"`
 	Type    string      `json:"type,omitempty"`
 	Message string      `json:"message,omitempty"`
-	Input   interface{} `json:"input,omitempty"`
-	Panic   bool
-	Cause   error
+	Input   interface{} `json:"-"`
+	Panic   bool        `json:"-"`
+	Cause   error       `json:"-"`
 	stack   *raven.Stacktrace
 }
 
