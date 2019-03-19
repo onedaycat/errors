@@ -87,11 +87,11 @@ type Error interface {
 
 // AppError error
 type AppError struct {
-	Status  int         `json:"status"`
-	Code    string      `json:"code"`
-	Type    string      `json:"type"`
-	Message string      `json:"message"`
-	Input   interface{} `json:"input"`
+	Status  int         `json:"status,omitempty"`
+	Code    string      `json:"code,omitempty"`
+	Type    string      `json:"type,omitempty"`
+	Message string      `json:"message,omitempty"`
+	Input   interface{} `json:"input,omitempty"`
 	Panic   bool
 	Cause   error
 	stack   *raven.Stacktrace
