@@ -304,6 +304,10 @@ func Convert(goerr error, err Error) Error {
 	return err.WithCause(goerr)
 }
 
+func Simple(msg string) error {
+	return errors.New(msg)
+}
+
 func New(msg string) *AppError {
 	return &AppError{Status: InternalErrorStatus, Type: InternalErrorType, Code: msg, Message: msg, Input: nil, Cause: nil, stack: nil}
 }
