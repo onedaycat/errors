@@ -75,6 +75,7 @@ type Error interface {
 	WithUnknownError() *AppError
 	Format(s fmt.State, verb rune)
 	StackStrings() []string
+	HasStackTrace() bool
 
 	GetStatus() int
 	GetCode() string
@@ -146,6 +147,10 @@ func (e *AppError) String() string {
 // Stack return Sentry Stack trace
 func (e *AppError) StackTrace() *raven.Stacktrace {
 	return e.stack
+}
+
+func (e *AppError) HasStackTrace() bool {
+	return e.stack != nil
 }
 
 func (e *AppError) WithStatus(status int) *AppError {
