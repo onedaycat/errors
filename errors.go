@@ -456,6 +456,14 @@ func ErrStatus(err error) int {
 	return herr.Status
 }
 
+func Is(checkErr Error, err Error) bool {
+	return checkErr.GetCode() == err.GetCode()
+}
+
+func IsCode(code string, err Error) bool {
+	return err.GetCode() == err.GetCode()
+}
+
 func IsNotFound(err Error) bool {
 	return err != nil && err.GetStatus() == 404
 }
