@@ -39,8 +39,17 @@ func Def(code, errType string) *ErrorDefinition {
 	return e
 }
 
-func (e *ErrorDefinition) Message(msg string) {
+func DefM(code, errType, msg string) *ErrorDefinition {
+	e := Def(code, errType)
 	e.Msg = msg
+
+	return e
+}
+
+func (e *ErrorDefinition) Message(msg string) *ErrorDefinition {
+	e.Msg = msg
+
+	return e
 }
 
 func (e *ErrorDefinition) New(msg ...string) *AppError {
