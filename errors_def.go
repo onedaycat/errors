@@ -3,31 +3,34 @@ package errors
 import "fmt"
 
 type ErrorDefinition struct {
-	Code   string
-	Type   string
-	Status int
-	Msg    string
+	Code    string
+	Type    string
+	Status  int
+	Message string
 }
 
-func Def(code string) *ErrorDefinition {
+func Def(code, errType string, status int, msg ...string) *ErrorDefinition {
 	e := &ErrorDefinition{
 		Code:   code,
-		Status: UnknownErrorStatus,
-		Type:   UnknownErrorType,
+		Type:   errType,
+		Status: status,
+	}
+
+	if len(msg) > 0 {
+		e.Message = msg[0]
 	}
 
 	return e
 }
 
-func DefM(code, msg string) *ErrorDefinition {
-	e := Def(code)
-	e.Msg = msg
+func (e *ErrorDefinition) Msg(msg string) *ErrorDefinition {
+	e.Message = msg
 
 	return e
 }
 
-func (e *ErrorDefinition) Message(msg string) *ErrorDefinition {
-	e.Msg = msg
+func (e *ErrorDefinition) Msgf(format string, v ...interface{}) *ErrorDefinition {
+	e.Message = fmt.Sprintf(format, v...)
 
 	return e
 }
@@ -37,7 +40,7 @@ func (e *ErrorDefinition) New(msg ...string) *AppError {
 		return NewError(e.Status, e.Type, e.Code, msg[0])
 	}
 
-	return NewError(e.Status, e.Type, e.Code, e.Msg)
+	return NewError(e.Status, e.Type, e.Code, e.Message)
 }
 
 func (e *ErrorDefinition) Newf(format string, v ...interface{}) *AppError {
@@ -69,56 +72,119 @@ func (e *ErrorDefinition) Is(err Error) bool {
 	return e.Code == err.GetCode()
 }
 
-func (e *ErrorDefinition) BadRequest() *ErrorDefinition {
-	e.Type = BadRequestType
-	e.Status = 400
+func DefBadRequest(code string, msg ...string) *ErrorDefinition {
+	e := &ErrorDefinition{
+		Code:   code,
+		Type:   BadRequestType,
+		Status: 400,
+	}
+	if len(msg) > 0 {
+		e.Message = msg[0]
+	}
+
 	return e
 }
 
-func (e *ErrorDefinition) Unauthorized() *ErrorDefinition {
-	e.Type = UnauthorizedType
-	e.Status = 401
+func DefUnauthorized(code string, msg ...string) *ErrorDefinition {
+	e := &ErrorDefinition{
+		Code:   code,
+		Type:   UnauthorizedType,
+		Status: 401,
+	}
+	if len(msg) > 0 {
+		e.Message = msg[0]
+	}
+
 	return e
 }
 
-func (e *ErrorDefinition) Forbidden() *ErrorDefinition {
-	e.Type = ForbiddenType
-	e.Status = 403
+func DefForbidden(code string, msg ...string) *ErrorDefinition {
+	e := &ErrorDefinition{
+		Code:   code,
+		Type:   ForbiddenType,
+		Status: 403,
+	}
+	if len(msg) > 0 {
+		e.Message = msg[0]
+	}
+
 	return e
 }
 
-func (e *ErrorDefinition) NotFound() *ErrorDefinition {
-	e.Type = NotFoundType
-	e.Status = 404
+func DefNotFound(code string, msg ...string) *ErrorDefinition {
+	e := &ErrorDefinition{
+		Code:   code,
+		Type:   NotFoundType,
+		Status: 404,
+	}
+	if len(msg) > 0 {
+		e.Message = msg[0]
+	}
+
 	return e
 }
 
-func (e *ErrorDefinition) Timeout() *ErrorDefinition {
-	e.Type = TimeoutType
-	e.Status = 441
+func DefTimeout(code string, msg ...string) *ErrorDefinition {
+	e := &ErrorDefinition{
+		Code:   code,
+		Type:   TimeoutType,
+		Status: 441,
+	}
+	if len(msg) > 0 {
+		e.Message = msg[0]
+	}
+
 	return e
 }
 
-func (e *ErrorDefinition) InternalError() *ErrorDefinition {
-	e.Type = InternalErrorType
-	e.Status = 500
+func DefInternalError(code string, msg ...string) *ErrorDefinition {
+	e := &ErrorDefinition{
+		Code:   code,
+		Type:   InternalErrorType,
+		Status: 500,
+	}
+	if len(msg) > 0 {
+		e.Message = msg[0]
+	}
+
 	return e
 }
 
-func (e *ErrorDefinition) NotImplement() *ErrorDefinition {
-	e.Type = NotImplementType
-	e.Status = 501
+func DefNotImplement(code string, msg ...string) *ErrorDefinition {
+	e := &ErrorDefinition{
+		Code:   code,
+		Type:   NotImplementType,
+		Status: 501,
+	}
+	if len(msg) > 0 {
+		e.Message = msg[0]
+	}
+
 	return e
 }
 
-func (e *ErrorDefinition) Unavailable() *ErrorDefinition {
-	e.Type = UnavailableType
-	e.Status = 503
+func DefUnavailable(code string, msg ...string) *ErrorDefinition {
+	e := &ErrorDefinition{
+		Code:   code,
+		Type:   UnavailableType,
+		Status: 503,
+	}
+	if len(msg) > 0 {
+		e.Message = msg[0]
+	}
+
 	return e
 }
 
-func (e *ErrorDefinition) UnknownError() *ErrorDefinition {
-	e.Type = UnknownErrorType
-	e.Status = 520
+func DefUnknownError(code string, msg ...string) *ErrorDefinition {
+	e := &ErrorDefinition{
+		Code:   code,
+		Type:   UnknownErrorType,
+		Status: 520,
+	}
+	if len(msg) > 0 {
+		e.Message = msg[0]
+	}
+
 	return e
 }
