@@ -69,7 +69,7 @@ func (e *ErrorDefinition) WithInput(input interface{}) *AppError {
 }
 
 func (e *ErrorDefinition) Is(err Error) bool {
-	return e.Code == err.GetCode()
+	return err != nil && e.Code == err.GetCode()
 }
 
 func DefBadRequest(code string, msg ...string) *ErrorDefinition {
