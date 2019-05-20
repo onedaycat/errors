@@ -1,186 +1,202 @@
 package sentry
 
 import (
-	raven "github.com/getsentry/raven-go"
-	"github.com/onedaycat/errors"
+    "strconv"
+
+    "github.com/getsentry/raven-go"
+    "github.com/onedaycat/errors"
 )
 
 const (
-	_platform = "go"
+    _platform = "go"
 )
 
 var defaultOption = &options{
-	logger: "root",
+    logger: "root",
 }
 
 type Tags = raven.Tags
 type Tag = raven.Tag
 type Extra = raven.Extra
 
+const defaultFingerprint = "{{ default }}"
+const inputsKey = "inputs"
+
 type User struct {
-	ID     string   `json:"id,omitempty"`
-	Email  string   `json:"email,omitempty"`
-	Groups []string `json:"groups,omitempty"`
-	IP     string   `json:"ip,omitempty"`
+    ID     string   `json:"id,omitempty"`
+    Email  string   `json:"email,omitempty"`
+    Groups []string `json:"groups,omitempty"`
+    IP     string   `json:"ip,omitempty"`
 }
 
+type stackInput struct {
+    Exception string      `json:"exception"`
+    Input     interface{} `json:"input"`
+}
+
+func (h *User) Class() string { return "user" }
+
 type Packet struct {
-	packet *raven.Packet
+    packet *raven.Packet
 }
 
 type Sentry struct {
-	dsn     string
-	options *options
+    dsn     string
+    options *options
 }
 
 func SetDSN(dsn string) {
-	raven.SetDSN(dsn)
+    _ = raven.SetDSN(dsn)
 }
 
 func SetOptions(option ...Option) {
-	for _, opt := range option {
-		opt(defaultOption)
-	}
+    for _, opt := range option {
+        opt(defaultOption)
+    }
 }
 
-func NewPacket(err error) *Packet {
-	p := &Packet{
-		packet: &raven.Packet{
-			Message:     err.Error(),
-			Level:       raven.ERROR,
-			Platform:    _platform,
-			Extra:       Extra{},
-			Tags:        defaultOption.tags,
-			Environment: defaultOption.env,
-			ServerName:  defaultOption.serverName,
-			Release:     defaultOption.release,
-			Logger:      defaultOption.logger,
-			Fingerprint: make([]string, 1, 5),
-		},
-	}
+func NewPacket(err errors.Error) *Packet {
+    if err == nil {
+        return nil
+    }
 
-	p.packet.Fingerprint[0] = defaultOption.logger
-	if defaultOption.extra != nil {
-		mergeExtra(p.packet.Extra, defaultOption.extra)
-	}
+    isPanic := err.IsPanic()
+    msg := err.GetMessage()
+    root := err.RootError()
 
-	return p
+    expsList := make([]*raven.Exception, 0, 5)
+    inputs := make([]interface{}, 0, 5)
+
+    var errStack *errors.Stacktrace
+    for err != nil {
+        errStack = err.GetStacktrace()
+        if errStack == nil {
+            expsList = append(expsList, &raven.Exception{
+                Value: err.Error(),
+                Type:  err.GetCode(),
+            })
+        } else {
+            stackTrace := &raven.Stacktrace{
+                Frames: make([]*raven.StacktraceFrame, len(errStack.Frames)),
+            }
+            for i, frame := range errStack.Frames {
+                stackTrace.Frames[i] = raven.NewStacktraceFrame(0, frame.Function, frame.Filename, frame.Lineno, 3, nil)
+            }
+
+            expsList = append(expsList, &raven.Exception{
+                Value:      err.Error(),
+                Type:       err.GetCode(),
+                Stacktrace: stackTrace,
+            })
+        }
+
+        inputs = append(inputs, err.GetInput())
+
+        xerr := err.Unwrap()
+        if xerr == nil {
+            break
+        }
+        err = xerr.(errors.Error)
+    }
+
+    extra := Extra{}
+    n := len(expsList)
+    exps := &raven.Exceptions{
+        Values: make([]*raven.Exception, n),
+    }
+
+    stackInputs := make([]*stackInput, n)
+    for i := 0; i < n; i++ {
+        exps.Values[i] = expsList[n-i-1]
+        stackInputs[i] = &stackInput{
+            Exception: expsList[i].Type + "_" + strconv.Itoa(i+1),
+            Input:     inputs[i],
+        }
+    }
+
+    extra[inputsKey] = stackInputs
+
+    p := &Packet{
+        packet: &raven.Packet{
+            Message:     msg,
+            Platform:    _platform,
+            Extra:       extra,
+            Tags:        defaultOption.tags,
+            Environment: defaultOption.env,
+            ServerName:  defaultOption.serverName,
+            Release:     defaultOption.release,
+            Logger:      defaultOption.logger,
+            Culprit:     root.GetMessage(),
+            Fingerprint: []string{
+                defaultFingerprint,
+                defaultOption.logger,
+            },
+            Interfaces: []raven.Interface{exps},
+        },
+    }
+
+    if isPanic {
+        p.packet.Level = raven.FATAL
+    } else {
+        p.packet.Level = raven.ERROR
+    }
+
+    if defaultOption.extra != nil {
+        mergeExtra(p.packet.Extra, defaultOption.extra)
+    }
+
+    return p
 }
 
 func (p *Packet) RawPacket() *raven.Packet {
-	return p.packet
+    return p.packet
 }
 
 func (p *Packet) SetMessage(msg string) {
-	p.packet.Message = msg
+    p.packet.Message = msg
 }
 
 func (p *Packet) SetCulprit(culprit string) {
-	p.packet.Culprit = culprit
+    p.packet.Culprit = culprit
 }
 
-func (p *Packet) SetFingerprint(fingerprints ...string) {
-	p.packet.Fingerprint = append(p.packet.Fingerprint, fingerprints...)
+func (p *Packet) AddFingerprint(fingerprints ...string) {
+    p.packet.Fingerprint = append(p.packet.Fingerprint, fingerprints...)
 }
 
-func (p *Packet) AddUser(user *User) {
-	p.packet.Extra["user"] = user
+func (p *Packet) SetUser(user *User) {
+    p.packet.Interfaces = append(p.packet.Interfaces, user)
 }
 
 func (p *Packet) AddExtra(extra Extra) {
-	if extra != nil {
-		mergeExtra(p.packet.Extra, extra)
-	}
+    if extra != nil {
+        mergeExtra(p.packet.Extra, extra)
+    }
 }
 
 func (p *Packet) AddTag(key, value string) {
-	p.packet.Tags = append(p.packet.Tags, Tag{key, value})
-}
-
-func (p *Packet) AddStackTrace(stack raven.Interface) {
-	if stack != nil {
-		p.packet.Interfaces = append(p.packet.Interfaces, stack)
-	}
-}
-
-func (p *Packet) AddError(err errors.Error) {
-	expList := make([]*raven.Exception, 0, 2)
-
-	expList = append(expList, &raven.Exception{
-		Stacktrace: err.StackTrace(),
-		Value:      err.GetMessage(),
-		Type:       err.GetCode(),
-	})
-
-	input := err.GetInput()
-	if input != nil {
-		p.AddExtra(Extra{expList[0].Type: input})
-	}
-
-	lastError := expList[0].Value
-
-	var cause error
-	cause = err.GetCause()
-	for {
-		if cause != nil {
-			herr, ok := cause.(*errors.AppError)
-			if ok {
-				cause = herr.Cause
-				msg := herr.GetMessage()
-				expList = append(expList, &raven.Exception{
-					Stacktrace: herr.StackTrace(),
-					Value:      msg,
-					Type:       herr.GetCode(),
-				})
-
-				input := herr.GetInput()
-				if input != nil {
-					p.AddExtra(Extra{herr.GetCode(): input})
-				}
-
-				lastError = msg
-			} else {
-				msg := cause.Error()
-				expList = append(expList, &raven.Exception{
-					Value: msg,
-					Type:  errors.GolangErrorType,
-				})
-
-				lastError = msg
-				break
-			}
-		} else {
-			break
-		}
-	}
-
-	exps := &raven.Exceptions{
-		Values: make([]*raven.Exception, len(expList)),
-	}
-
-	n := len(expList)
-	for i := 0; i < n; i++ {
-		exps.Values[n-i-1] = expList[i]
-		p.packet.Fingerprint = append(p.packet.Fingerprint, expList[i].Type)
-	}
-
-	p.packet.Culprit = lastError
-	p.packet.Interfaces = append(p.packet.Interfaces, exps)
+    p.packet.Tags = append(p.packet.Tags, Tag{Key: key, Value: value})
 }
 
 func Capture(packet *Packet) {
-	_, _ = raven.Capture(packet.packet, nil)
+    if packet == nil {
+        return
+    }
+    _, _ = raven.Capture(packet.packet, nil)
 }
 
 func CaptureAndWait(packet *Packet) {
-	eventID, ch := raven.Capture(packet.packet, nil)
-	if eventID != "" {
-		<-ch
-	}
+    if packet == nil {
+        return
+    }
+    eventID, ch := raven.Capture(packet.packet, nil)
+    if eventID != "" {
+        <-ch
+    }
 }
 
 func mergeExtra(baseExtra Extra, extra Extra) {
-	for key, val := range extra {
-		baseExtra[key] = val
-	}
+    for key, val := range extra {
+        baseExtra[key] = val
+    }
 }
