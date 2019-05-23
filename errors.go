@@ -79,11 +79,10 @@ func (e *GenericError) ErrorWithCause() string {
 func (e *GenericError) Format(s fmt.State, verb rune) {
     switch verb {
     case 'v':
-        _, _ = fmt.Fprintf(s, "%+v\n", e.Error())
+        _, _ = fmt.Fprintf(s, "%s\n", e.Error())
 
         if s.Flag('+') {
             if e.frame != nil {
-                // fmt.Fprintln(s)
                 for _, frame := range e.frame.Frames {
                     _, _ = fmt.Fprintf(s, "%s\t%s:%d\n", frame.Function, frame.AbsolutePath, frame.Lineno)
                 }
@@ -91,9 +90,8 @@ func (e *GenericError) Format(s fmt.State, verb rune) {
 
             cause := e.cause
             for cause != nil {
-                _, _ = fmt.Fprintf(s, "\n%+v\n", cause.Error())
+                _, _ = fmt.Fprintf(s, "\n%s\n", cause.Error())
                 if stack := cause.GetStacktrace(); stack != nil {
-                    // fmt.Fprintln(s)
                     for _, frame := range stack.Frames {
                         _, _ = fmt.Fprintf(s, "%s\t%s:%d\n", frame.Function, frame.AbsolutePath, frame.Lineno)
                     }
@@ -108,6 +106,15 @@ func (e *GenericError) Format(s fmt.State, verb rune) {
         }
     case 's':
         _, _ = io.WriteString(s, e.Error())
+        cause := e.cause
+        for cause != nil {
+            _, _ = io.WriteString(s, e.Error())
+            xcause := cause.Unwrap()
+            if xcause == nil {
+                break
+            }
+            cause = xcause.(Error)
+        }
     default:
         _, _ = fmt.Fprintf(s, "%s", e.Error())
     }
@@ -128,6 +135,7 @@ func (e *GenericError) WithCause(err error) Error {
             Code:    GenericCode,
             Message: err.Error(),
             errType: InternalErrorType,
+            frame:   NewStacktrace(1),
         }
 
         return e

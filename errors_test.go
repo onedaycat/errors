@@ -54,16 +54,17 @@ func TestPrintError(t *testing.T) {
     //err := New("code1", "err1").WithCaller()
 
     result := fmt.Sprintf("%+v\n", x())
+    //fmt.Println(result)
     require.Contains(t, result, "code2: err2")
     require.Contains(t, result, "code1: err1")
-    require.Contains(t, result, "err0")
-    require.Contains(t, result, "x")
-    require.Contains(t, result, "y")
+    require.Contains(t, result, "err0\n")
+    require.Contains(t, result, "x\t")
+    require.Contains(t, result, "y\t")
 
-    stackString := x().(Error).GetStacktrace().String()
+    stackString := x().(Error).RootError().GetStacktrace().String()
     fmt.Println(stackString)
-    require.Contains(t, stackString, "x")
-    require.Contains(t, stackString, "y")
+    require.Contains(t, stackString, "x\t")
+    require.Contains(t, stackString, "y\t")
 }
 
 func TestUtils(t *testing.T) {

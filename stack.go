@@ -10,6 +10,10 @@ type Stacktrace struct {
     Frames []*StacktraceFrame `json:"frames"`
 }
 
+func (f *Stacktrace) Caller() *StacktraceFrame {
+    return f.Frames[len(f.Frames)-1:][0]
+}
+
 func (f *Stacktrace) String() string {
     sb := &strings.Builder{}
     for _, frame := range f.Frames {
@@ -36,6 +40,10 @@ type StacktraceFrame struct {
     Lineno       int    `json:"lineno,omitempty"`
     Colno        int    `json:"colno,omitempty"`
     AbsolutePath string `json:"abs_path,omitempty"`
+}
+
+func (sf *StacktraceFrame) String() string {
+    return fmt.Sprintf("%s\t%s:%d\n", sf.Function, sf.AbsolutePath, sf.Lineno)
 }
 
 func NewStacktrace(skip int) *Stacktrace {
