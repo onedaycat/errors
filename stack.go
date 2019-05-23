@@ -19,6 +19,15 @@ func (f *Stacktrace) String() string {
     return sb.String()
 }
 
+func (f *Stacktrace) Strings() []string {
+    strs := make([]string, len(f.Frames))
+    for i, frame := range f.Frames {
+        strs[i] = fmt.Sprintf("%s %s:%d", frame.Function, frame.AbsolutePath, frame.Lineno)
+    }
+
+    return strs
+}
+
 type StacktraceFrame struct {
     Filename string `json:"filename,omitempty"`
     Function string `json:"function,omitempty"`
