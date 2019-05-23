@@ -1,9 +1,8 @@
 package errors
 
 import (
+    "fmt"
     "io"
-
-    "golang.org/x/exp/errors/fmt"
 )
 
 const GenericCode = "Generic"
@@ -108,7 +107,7 @@ func (e *GenericError) Format(s fmt.State, verb rune) {
         _, _ = io.WriteString(s, e.Error())
         cause := e.cause
         for cause != nil {
-            _, _ = io.WriteString(s, e.Error())
+            _, _ = fmt.Fprintf(s, " %s", e.Error())
             xcause := cause.Unwrap()
             if xcause == nil {
                 break
