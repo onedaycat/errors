@@ -43,7 +43,7 @@ type StacktraceFrame struct {
 }
 
 func (sf *StacktraceFrame) String() string {
-    return fmt.Sprintf("%s\t%s:%d\n", sf.Function, sf.AbsolutePath, sf.Lineno)
+    return fmt.Sprintf("%s %s:%d", sf.Function, sf.AbsolutePath, sf.Lineno)
 }
 
 func NewStacktrace(skip int) *Stacktrace {
