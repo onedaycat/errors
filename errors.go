@@ -27,10 +27,11 @@ type Error interface {
     Format(s fmt.State, verb rune)
     RootError() Error
     IsPanic() bool
+    JSON() *JSONError
 
     GetCode() string
     GetMessage() string
-    GetStacktrace() *Stacktrace
+    GetStacktrace() Stacktrace
     GetAllInputs() []interface{}
     GetInput() interface{}
     GetType() string
@@ -43,13 +44,13 @@ type Error interface {
 }
 
 type GenericError struct {
-    Code    string `json:"code,omitempty"`
-    Message string `json:"message,omitempty"`
-    errType string
-    cause   Error
-    frame   *Stacktrace
-    panic   bool
-    input   interface{}
+    Code       string `json:"code,omitempty"`
+    Message    string `json:"message,omitempty"`
+    errType    string
+    cause      Error
+    stacktrace Stacktrace
+    panic      bool
+    input      interface{}
 }
 
 func (e *GenericError) Error() string {
@@ -81,9 +82,9 @@ func (e *GenericError) Format(s fmt.State, verb rune) {
         _, _ = fmt.Fprintf(s, "%s\n", e.Error())
 
         if s.Flag('+') {
-            if e.frame != nil {
-                for _, frame := range e.frame.Frames {
-                    _, _ = fmt.Fprintf(s, "%s\t%s:%d\n", frame.Function, frame.AbsolutePath, frame.Lineno)
+            if e.stacktrace != nil {
+                for _, frame := range e.stacktrace {
+                    _, _ = fmt.Fprintf(s, "%s\t%s:%d\n", frame.Function, frame.Filename, frame.Lineno)
                 }
             }
 
@@ -91,8 +92,8 @@ func (e *GenericError) Format(s fmt.State, verb rune) {
             for cause != nil {
                 _, _ = fmt.Fprintf(s, "\n%s\n", cause.Error())
                 if stack := cause.GetStacktrace(); stack != nil {
-                    for _, frame := range stack.Frames {
-                        _, _ = fmt.Fprintf(s, "%s\t%s:%d\n", frame.Function, frame.AbsolutePath, frame.Lineno)
+                    for _, frame := range stack {
+                        _, _ = fmt.Fprintf(s, "%s\t%s:%d\n", frame.Function, frame.Filename, frame.Lineno)
                     }
                 }
 
@@ -131,17 +132,17 @@ func (e *GenericError) WithCause(err error) Error {
     cause, ok := err.(*GenericError)
     if !ok {
         e.cause = &GenericError{
-            Code:    GenericCode,
-            Message: err.Error(),
-            errType: InternalErrorType,
-            frame:   NewStacktrace(1),
+            Code:       GenericCode,
+            Message:    err.Error(),
+            errType:    InternalErrorType,
+            stacktrace: NewStacktrace(1),
         }
 
         return e
     }
 
     e.cause = cause
-    e.frame.Frames = e.frame.Frames[len(e.frame.Frames)-1:]
+    e.stacktrace = e.stacktrace[len(e.stacktrace)-1:]
     e.panic = cause.panic
 
     return e
@@ -175,8 +176,8 @@ func (e *GenericError) GetCode() string {
     return e.Code
 }
 
-func (e *GenericError) GetStacktrace() *Stacktrace {
-    return e.frame
+func (e *GenericError) GetStacktrace() Stacktrace {
+    return e.stacktrace
 }
 
 func (e *GenericError) GetAllInputs() []interface{} {
@@ -279,88 +280,88 @@ func (e *GenericError) IsPanic() bool {
 
 func New(msg string) Error {
     return &GenericError{
-        Code:    GenericCode,
-        Message: msg,
-        frame:   NewStacktrace(1),
+        Code:       GenericCode,
+        Message:    msg,
+        stacktrace: NewStacktrace(1),
     }
 }
 
 func NewWithCode(code, msg string) Error {
     return &GenericError{
-        Code:    code,
-        Message: msg,
-        frame:   NewStacktrace(1),
+        Code:       code,
+        Message:    msg,
+        stacktrace: NewStacktrace(1),
     }
 }
 
 func NewWithTypeAndCode(errType, code, msg string) Error {
     return &GenericError{
-        Code:    code,
-        Message: msg,
-        errType: errType,
-        frame:   NewStacktrace(1),
+        Code:       code,
+        Message:    msg,
+        errType:    errType,
+        stacktrace: NewStacktrace(1),
     }
 }
 
 func BadRequest(code, msg string) Error {
     return &GenericError{
-        Code:    code,
-        Message: msg,
-        errType: BadRequestType,
-        frame:   NewStacktrace(1),
+        Code:       code,
+        Message:    msg,
+        errType:    BadRequestType,
+        stacktrace: NewStacktrace(1),
     }
 }
 
 func Unauthorized(code, msg string) Error {
     return &GenericError{
-        Code:    code,
-        Message: msg,
-        errType: UnauthorizedType,
-        frame:   NewStacktrace(1),
+        Code:       code,
+        Message:    msg,
+        errType:    UnauthorizedType,
+        stacktrace: NewStacktrace(1),
     }
 }
 
 func Forbidden(code, msg string) Error {
     return &GenericError{
-        Code:    code,
-        Message: msg,
-        errType: ForbiddenType,
-        frame:   NewStacktrace(1),
+        Code:       code,
+        Message:    msg,
+        errType:    ForbiddenType,
+        stacktrace: NewStacktrace(1),
     }
 }
 
 func NotFound(code, msg string) Error {
     return &GenericError{
-        Code:    code,
-        Message: msg,
-        errType: NotFoundType,
-        frame:   NewStacktrace(1),
+        Code:       code,
+        Message:    msg,
+        errType:    NotFoundType,
+        stacktrace: NewStacktrace(1),
     }
 }
 
 func Timeout(code, msg string) Error {
     return &GenericError{
-        Code:    code,
-        Message: msg,
-        errType: TimeoutType,
-        frame:   NewStacktrace(1),
+        Code:       code,
+        Message:    msg,
+        errType:    TimeoutType,
+        stacktrace: NewStacktrace(1),
     }
 }
 
 func InternalError(code, msg string) Error {
     return &GenericError{
-        Code:    code,
-        Message: msg,
-        errType: InternalErrorType,
-        frame:   NewStacktrace(1),
+        Code:       code,
+        Message:    msg,
+        errType:    InternalErrorType,
+        stacktrace: NewStacktrace(1),
     }
 }
 
 func NotImplement(code, msg string) Error {
     return &GenericError{
-        Code:    code,
-        Message: msg,
-        errType: NotImplementType,
-        frame:   NewStacktrace(1),
+        Code:       code,
+        Message:    msg,
+        errType:    NotImplementType,
+        stacktrace: NewStacktrace(1),
     }
 }

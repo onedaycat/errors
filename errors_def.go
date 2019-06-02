@@ -24,27 +24,27 @@ func Def(errType, code string, msg ...string) *ErrorDefinition {
 func (e *ErrorDefinition) New(msg ...string) Error {
     if len(msg) > 0 {
         return &GenericError{
-            Code:    e.Code,
-            Message: msg[0],
-            errType: e.Type,
-            frame:   NewStacktrace(1),
+            Code:       e.Code,
+            Message:    msg[0],
+            errType:    e.Type,
+            stacktrace: NewStacktrace(1),
         }
     }
 
     return &GenericError{
-        Code:    e.Code,
-        Message: e.Message,
-        errType: e.Type,
-        frame:   NewStacktrace(1),
+        Code:       e.Code,
+        Message:    e.Message,
+        errType:    e.Type,
+        stacktrace: NewStacktrace(1),
     }
 }
 
 func (e *ErrorDefinition) Newf(format string, v ...interface{}) Error {
     return &GenericError{
-        Code:    e.Code,
-        Message: fmt.Sprintf(format, v...),
-        errType: e.Type,
-        frame:   NewStacktrace(1),
+        Code:       e.Code,
+        Message:    fmt.Sprintf(format, v...),
+        errType:    e.Type,
+        stacktrace: NewStacktrace(1),
     }
 }
 

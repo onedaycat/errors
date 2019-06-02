@@ -1,6 +1,7 @@
 package errors
 
 import (
+    "encoding/json"
     "errors"
     "fmt"
     "testing"
@@ -103,4 +104,19 @@ func TestRootError(t *testing.T) {
 
     err = InternalError("code2", "err2").WithCause(err)
     require.EqualError(t, err.RootError(), "code1: err1")
+}
+
+func TestJSON(t *testing.T) {
+    jsonErr := x().(Error).JSON()
+    jsonErrByte, _ := json.Marshal(jsonErr)
+    //fmt.Println(string(jsonErrByte))
+    jer := &JSONError{}
+    err := json.Unmarshal(jsonErrByte, jer)
+    require.NoError(t, err)
+
+    newErr := ParseJSONError(jer)
+    require.Equal(t, x().Error(), newErr.Error())
+    require.Equal(t, x().(Error).GetStacktrace(), newErr.GetStacktrace())
+    require.Equal(t, x().(Error).RootError().Error(), newErr.RootError().Error())
+    require.Equal(t, x().(Error).Unwrap().Error(), newErr.Unwrap().Error())
 }

@@ -22,8 +22,8 @@ func Unwrap(err error) error {
 
 func Wrap(err error) Error {
     return &GenericError{
-        Code:    GenericCode,
-        Message: err.Error(),
-        frame:   NewStacktrace(1),
+        Code:       GenericCode,
+        Message:    err.Error(),
+        stacktrace: NewStacktrace(1),
     }
 }
