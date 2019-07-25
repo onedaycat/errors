@@ -80,7 +80,7 @@ func (e *GenericError) Format(s fmt.State, verb rune) {
     switch verb {
     case 'v':
         _, _ = fmt.Fprintf(s, "%s\n", e.Error())
-        
+
         if s.Flag('+') {
             if e.stacktrace != nil {
                 for _, frame := range e.stacktrace {
@@ -96,7 +96,7 @@ func (e *GenericError) Format(s fmt.State, verb rune) {
                         _, _ = fmt.Fprintf(s, "%s\t%s:%d\n", frame.Function, frame.Filename, frame.Lineno)
                     }
                 }
-                
+
                 xcause := cause.Unwrap()
                 if xcause == nil {
                     break
