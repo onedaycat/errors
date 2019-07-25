@@ -128,7 +128,7 @@ func (e *GenericError) WithCause(err error) Error {
     if err == nil {
         return e
     }
-    
+
     cause, ok := err.(*GenericError)
     if !ok {
         e.cause = &GenericError{
@@ -140,11 +140,11 @@ func (e *GenericError) WithCause(err error) Error {
 
         return e
     }
-    
+
     e.cause = cause
     e.stacktrace = e.stacktrace[len(e.stacktrace)-1:]
     e.panic = cause.panic
-    
+
     return e
 }
 
