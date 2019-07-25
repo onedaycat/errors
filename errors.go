@@ -241,7 +241,7 @@ func (e *GenericError) Is(err error) bool {
 }
 
 func (e *GenericError) IsType(errType string) bool {
-    if e.errType == e.errType {
+    if e.errType == errType {
         return true
     }
 
