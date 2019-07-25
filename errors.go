@@ -28,14 +28,14 @@ type Error interface {
     RootError() Error
     IsPanic() bool
     JSON() *JSONError
-    
+
     GetCode() string
     GetMessage() string
     GetStacktrace() Stacktrace
     GetAllInputs() []interface{}
     GetInput() interface{}
     GetType() string
-    
+
     WithPanic() Error
     WithCause(err error) Error
     WithInput(input interface{}) Error
@@ -57,7 +57,7 @@ func (e *GenericError) Error() string {
     if e.Code != "" && e.Code != GenericCode {
         return fmt.Sprintf("%s: %s", e.Code, e.Message)
     }
-    
+
     return e.Message
 }
 
@@ -72,7 +72,7 @@ func (e *GenericError) ErrorWithCause() string {
         }
         cause = xcause.(Error)
     }
-    
+
     return s
 }
 
@@ -87,7 +87,7 @@ func (e *GenericError) Format(s fmt.State, verb rune) {
                     _, _ = fmt.Fprintf(s, "%s\t%s:%d\n", frame.Function, frame.Filename, frame.Lineno)
                 }
             }
-            
+
             cause := e.cause
             for cause != nil {
                 _, _ = fmt.Fprintf(s, "\n%s\n", cause.Error())
@@ -137,7 +137,7 @@ func (e *GenericError) WithCause(err error) Error {
             errType:    InternalErrorType,
             stacktrace: NewStacktrace(1),
         }
-        
+
         return e
     }
     
@@ -150,25 +150,25 @@ func (e *GenericError) WithCause(err error) Error {
 
 func (e *GenericError) WithPanic() Error {
     e.panic = true
-    
+
     return e
 }
 
 func (e *GenericError) WithInput(input interface{}) Error {
     e.input = input
-    
+
     return e
 }
 
 func (e *GenericError) WithMessage(msg string) Error {
     e.Message = msg
-    
+
     return e
 }
 
 func (e *GenericError) WithMessagef(format string, args ...interface{}) Error {
     e.Message = fmt.Sprintf(format, args...)
-    
+
     return e
 }
 
@@ -185,7 +185,7 @@ func (e *GenericError) GetAllInputs() []interface{} {
     if e.input != nil {
         inputs = append(inputs, e.input)
     }
-    
+
     cause := e.cause
     for cause != nil {
         cerr := cause.(*GenericError)
@@ -198,7 +198,7 @@ func (e *GenericError) GetAllInputs() []interface{} {
         }
         cause = xcause.(Error)
     }
-    
+
     return inputs
 }
 
@@ -219,11 +219,11 @@ func (e *GenericError) Is(err error) bool {
     if !ok {
         return false
     }
-    
+
     if e.Code == xerr.GetCode() {
         return true
     }
-    
+
     cause := e.cause
     for cause != nil {
         cerr := cause.(*GenericError)
@@ -236,7 +236,7 @@ func (e *GenericError) Is(err error) bool {
         }
         cause = xcause.(*GenericError)
     }
-    
+
     return false
 }
 
@@ -244,7 +244,7 @@ func (e *GenericError) IsType(errType string) bool {
     if e.errType == errType {
         return true
     }
-    
+
     cause := e.cause
     for cause != nil {
         cerr := cause.(*GenericError)
@@ -257,7 +257,7 @@ func (e *GenericError) IsType(errType string) bool {
         }
         cause = xcause.(Error)
     }
-    
+
     return false
 }
 
@@ -270,7 +270,7 @@ func (e *GenericError) RootError() Error {
         }
         cause = xcause.(Error)
     }
-    
+
     return e
 }
 
