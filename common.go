@@ -1,23 +1,33 @@
 package errors
 
-import (
-    "golang.org/x/exp/errors"
-)
-
-func As(err error, target interface{}) bool {
-    return errors.As(err, target)
-}
-
 func Is(err, target error) bool {
-    return errors.Is(err, target)
-}
+    u, ok := err.(Error)
+    if !ok {
+        if target == nil {
+            return err == target
+        }
+        for {
+            if err == target {
+                return true
+            }
+            if x, ok := err.(interface{ Is(error) bool }); ok && x.Is(target) {
+                return true
+            }
+            if err = Unwrap(err); err == nil {
+                return false
+            }
+        }
+    }
 
-func Opaque(err error) error {
-    return errors.Opaque(err)
+    return u.Is(target)
 }
 
 func Unwrap(err error) error {
-    return errors.Unwrap(err)
+    u, ok := err.(Error)
+    if !ok {
+        return nil
+    }
+    return u.Unwrap()
 }
 
 func Wrap(err error) Error {
